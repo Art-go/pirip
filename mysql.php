@@ -34,7 +34,7 @@ function get_orders($date = null) {
 function get_order_items($order_id) {
   global $mysqli;
   $stmt = $mysqli->prepare("
-    SELECT oi.quantity, d.name, d.price, (oi.quantity * d.price) AS subtotal
+    SELECT oi.quantity, d.name, d.price, d.img, (oi.quantity * d.price) AS subtotal
     FROM order_items oi
     JOIN dishes d ON oi.dish_id = d.id
     WHERE oi.order_id = ?
@@ -97,10 +97,59 @@ function save_dish($id, $name, $cat_id, $price, $img) {
   $price  = (float)$price;
   if ($id) {
       $stmt = $mysqli->prepare("UPDATE dishes SET name=?, cat_id=?, price=?, img=? WHERE id=?");
-      $stmt->bind_param('sissi', $name, $cat_id, $price, $img, $id);
+      $stmt->bind_param('sidsi', $name, $cat_id, $price, $img, $id);
   } else {
       $stmt = $mysqli->prepare("INSERT INTO dishes (name, cat_id, price, img) VALUES (?,?,?,?)");
-      $stmt->bind_param('sisd', $name, $cat_id, $price, $img);
+      $stmt->bind_param('sids', $name, $cat_id, $price, $img);
   }
   $stmt->execute();
+}
+
+function insert_order($phone, $address, $comment, $cart) {
+  global $mysqli;
+  $stmt = $mysqli->prepare(
+      "INSERT INTO orders (phone, address, comment, status, total) VALUES (?, ?, ?, 'pending', 0)"
+  );
+  $stmt->bind_param('sss', $phone, $address, $comment);
+  $stmt->execute();
+  $order_id = $mysqli->insert_id;
+
+  $ins = $mysqli->prepare(
+      "INSERT INTO order_items (order_id, dish_id, quantity) VALUES (?, ?, ?)"
+  );
+  foreach ($cart as $item) {
+      $dish_id  = (int)$item['id'];
+      $quantity = (int)($item['quantity'] ?? 1);
+      $ins->bind_param('iii', $order_id, $dish_id, $quantity);
+      $ins->execute();
+  }
+
+  $upd = $mysqli->prepare("
+      UPDATE orders SET total = (
+          SELECT COALESCE(SUM(oi.quantity * d.price), 0)
+          FROM order_items oi JOIN dishes d ON oi.dish_id = d.id
+          WHERE oi.order_id = ?
+      ) WHERE id = ?
+  ");
+  $upd->bind_param('ii', $order_id, $order_id);
+  $upd->execute();
+
+  return $order_id;
+}
+
+function pay_order($id) {
+  global $mysqli;
+  $stmt = $mysqli->prepare(
+      "UPDATE orders SET status='paid' WHERE id=? AND status='pending'"
+  );
+  $stmt->bind_param('i', $id);
+  $stmt->execute();
+}
+
+function get_order($id) {
+  global $mysqli;
+  $stmt = $mysqli->prepare("SELECT * FROM orders WHERE id=?");
+  $stmt->bind_param('i', $id);
+  $stmt->execute();
+  return $stmt->get_result()->fetch_assoc();
 }

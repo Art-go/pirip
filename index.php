@@ -13,10 +13,10 @@ HTML);?>
 <main class="container" id="app">
 <?php
 
-$categories = fetch_categories();
+$categories = get_categories();
 $dishes = [];
 
-foreach (fetch_items() as $item) {
+foreach (get_dishes() as $item) {
     $dishes[$item['cat_id']][] = $item;
 }
 
@@ -74,7 +74,7 @@ foreach ($categories as $cat) {
                 <span id="cartTotalPrice">0.00 ₽</span>
             </div>
             <button class="checkout-btn" id="checkoutBtn">
-                <i class="fas fa-arrow-right"></i> Оплата
+                <i class="fas fa-arrow-right"></i> Продолжить
             </button>
         </div>
     </div>

@@ -77,7 +77,7 @@ function gen_table($table_icon, $table_id, $table_name, $columns, $table, $rende
       foreach ($table as $row) {
           echo "<tr>";
           $render_row($row);
-          $row_name = isset($row['name']) ? ("«" . htmlspecialchars($row['name']) . "»") : "#{$row['id']}?";
+          $row_name = isset($row['name']) ? ("«" . htmlspecialchars($row['name']) . "»") : "#{$row['id']}";
           echo <<<HTML
           <td>
           <div class="row-actions">

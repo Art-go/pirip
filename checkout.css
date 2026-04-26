@@ -5,113 +5,7 @@
     align-items: start;
 }
 
-/* ── Order item list ── */
-.order-items-scroll {
-    max-height: 420px;
-    overflow-y: auto;
-    margin-bottom: 1.5rem;
-    padding-right: 12px;
-    scrollbar-width: thin;
-    scrollbar-color: #e05a2c #f5f0ec;
-}
-
-.order-items-scroll::-webkit-scrollbar {
-    width: 5px;
-}
-.order-items-scroll::-webkit-scrollbar-track {
-    background: #f5f0ec;
-    border-radius: 99px;
-}
-.order-items-scroll::-webkit-scrollbar-thumb {
-    background: #e05a2c;
-    border-radius: 99px;
-}
-
-/* ── Single order row ── */
-.order-row {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 0.85rem 0;
-    border-bottom: 1px solid #f5f0ec;
-}
-
-.order-row:last-child {
-    border-bottom: none;
-}
-
-.order-icon {
-    width: 46px;
-    height: 46px;
-    border-radius: 12px;
-    overflow: hidden;
-    flex-shrink: 0;
-    background: #f5f0ec;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.order-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.order-icon i {
-    color: #e05a2c;
-    font-size: 1.3rem;
-}
-
-.order-name {
-    flex: 1;
-    font-weight: 600;
-    font-size: 1rem;
-    color: #1e1e1e;
-    line-height: 1.3;
-}
-
-.order-meta {
-    text-align: right;
-    flex-shrink: 0;
-}
-
-.order-calc {
-    font-size: 0.82rem;
-    color: #888;
-    font-weight: 500;
-    white-space: nowrap;
-}
-
-.order-row-total {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #e05a2c;
-    white-space: nowrap;
-}
-
-/* ── Grand total ── */
-.order-total-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 1.1rem;
-    border-top: 3px solid #f0eae4;
-}
-
-.total-label {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #1e1e1e;
-}
-
-.total-amount {
-    font-size: 1.8rem;
-    font-weight: 800;
-    color: #e05a2c;
-}
-
-/* ── Form ── */
+/* form */
 .field-group {
     margin-bottom: 1.3rem;
 }
@@ -162,31 +56,7 @@
 
 .submit-btn {
     width: 100%;
-    background: #1e1e1e;
-    color: white;
-    border: none;
-    padding: 16px;
-    border-radius: 60px;
-    font-weight: 700;
-    font-size: 1.1rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    transition: background 0.2s, transform 0.15s;
     margin-top: 0.5rem;
-}
-
-.submit-btn:hover {
-    background: #e05a2c;
-    transform: scale(1.01);
-}
-
-.submit-btn:disabled {
-    opacity: 0.5;
-    pointer-events: none;
-    background: #aaa;
 }
 
 /* ── Empty state ── */

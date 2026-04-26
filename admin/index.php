@@ -27,15 +27,23 @@ $orders = get_orders($date);
   }); ?>
 
   <!-- ── DISHES ── -->
-  <?php gen_table("fa-utensils", "dishes", "Блюда", ["ID", "Изображение", "Название", "Категория", "Цена"], $dishes, function ($row){
+    <?php gen_table("fa-utensils", "dishes", "Блюда", ["ID", "Изображение", "Название", "Категория", "Цена"], $dishes, function ($row){
     ?>
-    <td style="color:#bbb;font-size:.85rem">#<?= $row['id'] ?></td>
-          <td><?php if ($row['img']): ?><img src="<?= htmlspecialchars($row['img']) ?>" alt=""><?php else: ?>—<?php endif; ?></td>
-          <td><strong><?= htmlspecialchars($row['name']) ?></strong></td>
-          <td style="color:#888"><?= htmlspecialchars($row['cat_name'] ?? '—') ?></td>
-          <td class="price-cell"><?= number_format($row['price'],2) ?> ₽</td>
+        <td style="color:#bbb;font-size:.85rem">#<?= $row['id'] ?></td>
+        <td>
+            <div class="order-icon">
+                <?php if ($row['img']): ?>
+                    <img src="<?= htmlspecialchars($row['img']) ?>" alt="">
+                <?php else: ?>
+                    <i class="fas fa-utensils"></i>
+                <?php endif; ?>
+            </div>
+        </td>
+        <td><strong><?= htmlspecialchars($row['name']) ?></strong></td>
+        <td style="color:#888"><?= htmlspecialchars($row['cat_name'] ?? '—') ?></td>
+        <td class="price-cell"><?= number_format($row['price'],2) ?> ₽</td>
     <?php
-  }); ?>
+    }); ?>
 
     <!-- ── ORDERS ── -->
     <div style="max-width:1400px;margin:1.5rem auto 0;padding:0 1.5rem">

@@ -57,7 +57,7 @@ echo gen_header("Обработка заказа", "<link rel=\"stylesheet\" hre
                     <i class="fas fa-circle-info" style="color:#e05a2c;"></i>
                     Проверьте телефон и адрес перед отправкой — мы не проверяем их автоматически.
                 </p>
-                <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                <button type="submit" class="btn-primary submit-btn" id="submitBtn" disabled>
                     <i class="fas fa-check-circle"></i> Оформить заказ
                 </button>
             </form>
