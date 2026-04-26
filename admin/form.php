@@ -9,16 +9,12 @@ $id    = (int)($_GET['id'] ?? 0);
 $allowed = ['categories', 'dishes', 'orders'];
 if (!in_array($table, $allowed)) exit('Invalid table');
 
-$row = [];
-if ($id) {
-    $res = $mysqli->query("SELECT * FROM `$table` WHERE id=$id");
-    $row = $res ? ($res->fetch_assoc() ?? []) : [];
-}
+$row        = $id ? get_row($table, $id) : [];
+$categories = get_categories();
 $isEdit = !empty($row);
 $title = $isEdit ? 'Редактировать' : 'Добавить';
 
-$tableLabels = ['categories' => 'Категория', 'dishes' => 'Блюдо', 'orders' => 'Заказ'];
-$categories = $mysqli->query("SELECT * FROM categories")->fetch_all(MYSQLI_ASSOC);
+$tableLabels = ['categories' => 'Категорию', 'dishes' => 'Блюдо', 'orders' => 'Заказ'];
 
 function val($row, $key, $default = '') {
     return htmlspecialchars($row[$key] ?? $default);
@@ -96,24 +92,60 @@ echo gen_admin_header("$title - {$tableLabels[$table]}", $style)?>
           <input type="text" name="img" value="<?= val($row,'img') ?>" placeholder="https://...">
         </div>
 
-      <?php elseif ($table === 'orders'): ?>
-        <div class="field">
-          <label>Телефон</label>
-          <input type="text" name="phone" value="<?= val($row,'phone') ?>">
-        </div>
-        <div class="field">
-          <label>Адрес</label>
-          <input type="text" name="address" value="<?= val($row,'address') ?>">
-        </div>
-        <div class="field">
-          <label>Комментарий</label>
-          <textarea name="comment" rows="3"><?= val($row,'comment') ?></textarea>
-        </div>
-        <div class="field">
-          <label>Корзина (JSON)</label>
-          <textarea name="cart_json" rows="5"><?= val($row,'cart_json') ?></textarea>
-        </div>
-      <?php endif; ?>
+        <?php elseif ($table === 'orders'): ?>
+          <div class="field">
+            <label>Телефон</label>
+            <input type="text" name="phone" value="<?= val($row,'phone') ?>">
+          </div>
+          <div class="field">
+            <label>Адрес</label>
+            <input type="text" name="address" value="<?= val($row,'address') ?>">
+          </div>
+          <div class="field">
+            <label>Комментарий</label>
+            <textarea name="comment" rows="3"><?= val($row,'comment') ?></textarea>
+          </div>
+          <div class="field">
+            <label>Статус</label>
+            <select name="status">
+              <?php foreach (['pending','paid','delivered'] as $s): ?>
+                <option value="<?= $s ?>" <?= ($row['status'] ?? '') === $s ? 'selected' : '' ?>><?= $s ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="field">
+            <label>Чек</label>
+            <input type="text" name="receipt_url" value="<?= val($row,'receipt_url') ?>">
+          </div>
+          <?php if ($id): $items = get_order_items($id); ?>
+          <div class="field">
+            <label>Позиции</label>
+            <table style="width:100%;border-collapse:collapse;font-size:.9rem;margin-top:4px">
+              <thead>
+                <tr style="border-bottom:2px solid #f0eae4">
+                  <th style="text-align:left;padding:6px 4px">Блюдо</th>
+                  <th style="text-align:right;padding:6px 4px">Кол-во</th>
+                  <th style="text-align:right;padding:6px 4px">Сумма</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php foreach ($items as $item): ?>
+                <tr style="border-bottom:1px solid #f5f0ec">
+                  <td style="padding:7px 4px"><?= htmlspecialchars($item['name']) ?></td>
+                  <td style="text-align:right;padding:7px 4px;color:#888"><?= $item['quantity'] ?></td>
+                  <td style="text-align:right;padding:7px 4px"><?= number_format($item['subtotal'],2) ?> ₽</td>
+                </tr>
+                <?php endforeach; ?>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="2" style="padding:8px 4px;font-weight:700;text-align:right">Итого:</td>
+                  <td style="text-align:right;padding:8px 4px;font-weight:700"><?= number_format($row['total'],2) ?> ₽</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        <?php endif; endif;?>
 
       <div class="actions">
         <a class="btn btn-secondary" href="index.php#<?= $table ?>">Отмена</a>

@@ -9,8 +9,7 @@ echo gen_header("Обработка заказа", "<link rel=\"stylesheet\" hre
 
         <!-- LEFT: Order summary -->
         <div class="panel">
-            <h2 class="panel-title"><i class="fas fa-receipt"></i> Ваш заказ</h2>
-
+        <span class="panel-head"><h2 class="panel-title"><i class="fas fa-receipt"></i> Ваш заказ</h2></span>    
             <div class="order-items-scroll" id="orderItemsList">
                 <!-- populated by JS -->
             </div>
@@ -23,7 +22,9 @@ echo gen_header("Обработка заказа", "<link rel=\"stylesheet\" hre
 
         <!-- RIGHT: Delivery form -->
         <div class="panel">
-            <h2 class="panel-title"><i class="fas fa-map-marker-alt"></i> Доставка</h2>
+            <span class="panel-head">
+                <h2 class="panel-title"><i class="fas fa-map-marker-alt"></i> Доставка</h2>
+            </span>
 
             <form method="POST" action="submit.php" id="orderForm">
                 <div class="field-group">

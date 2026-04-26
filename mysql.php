@@ -5,12 +5,102 @@ $mysqli = new mysqli("mysql-8.4.local", "root", "", "pirip");
 define('ADMIN_USER', 'admin');
 define('ADMIN_PASS', 'admin123');
 
-function fetch_categories() {
+function get_categories() {
   global $mysqli;
-  return $mysqli->query("SELECT * FROM categories");
+  return $mysqli->query("SELECT * FROM categories ORDER BY id")->fetch_all(MYSQLI_ASSOC);
 }
 
-function fetch_items() {
+function get_dishes() {
   global $mysqli;
-  return $mysqli->query("SELECT * FROM dishes");
+  return $mysqli->query("SELECT d.*, c.name AS cat_name FROM dishes d LEFT JOIN categories c ON d.cat_id=c.id ORDER BY d.id")->fetch_all(MYSQLI_ASSOC);
+}
+
+function get_orders($date = null) {
+  global $mysqli;
+  $date = $date ?: date('Y-m-d');
+  $stmt = $mysqli->prepare("
+    SELECT o.*, COUNT(oi.id) AS item_count
+    FROM orders o
+    LEFT JOIN order_items oi ON o.id = oi.order_id
+    WHERE DATE(o.created_at) = ?  
+    GROUP BY o.id
+    ORDER BY o.created_at DESC
+  ");
+  $stmt->bind_param('s', $date);
+  $stmt->execute();
+  return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+}
+
+function get_order_items($order_id) {
+  global $mysqli;
+  $stmt = $mysqli->prepare("
+    SELECT oi.quantity, d.name, d.price, (oi.quantity * d.price) AS subtotal
+    FROM order_items oi
+    JOIN dishes d ON oi.dish_id = d.id
+    WHERE oi.order_id = ?
+  ");
+  $stmt->bind_param('i', $order_id);
+  $stmt->execute();
+  return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+}
+
+function save_order($id, $phone, $address, $comment, $status, $receipt_url) {
+  global $mysqli;
+  if (!$id) return;
+  $allowed = ['pending','paid','delivered'];
+  if (!in_array($status, $allowed)) $status = 'pending';
+
+  $stmt = $mysqli->prepare("
+    SELECT COALESCE(SUM(oi.quantity * d.price), 0)
+    FROM order_items oi JOIN dishes d ON oi.dish_id = d.id
+    WHERE oi.order_id = ?
+  ");
+  $stmt->bind_param('i', $id);
+  $stmt->execute();
+  $total = $stmt->get_result()->fetch_row()[0];
+
+  $stmt = $mysqli->prepare("UPDATE orders SET phone=?, address=?, comment=?, status=?, receipt_url=?, total=? WHERE id=?");
+  $stmt->bind_param('sssssdi', $phone, $address, $comment, $status, $receipt_url, $total, $id);
+  $stmt->execute();
+}
+
+function get_row($table, $id) {
+  global $mysqli;
+  $stmt = $mysqli->prepare("SELECT * FROM `$table` WHERE id=?");
+  $stmt->bind_param('i', $id);
+  $stmt->execute();
+  return $stmt->get_result()->fetch_assoc() ?? [];
+}
+
+function delete_row($table, $id) {
+  global $mysqli;
+  $stmt = $mysqli->prepare("DELETE FROM `$table` WHERE id=?");
+  $stmt->bind_param('i', $id);
+  $stmt->execute();
+}
+
+function save_category($id, $name) {
+  global $mysqli;
+  if ($id) {
+      $stmt = $mysqli->prepare("UPDATE categories SET name=? WHERE id=?");
+      $stmt->bind_param('si', $name, $id);
+  } else {
+      $stmt = $mysqli->prepare("INSERT INTO categories (name) VALUES (?)");
+      $stmt->bind_param('s', $name);
+  }
+  $stmt->execute();
+}
+
+function save_dish($id, $name, $cat_id, $price, $img) {
+  global $mysqli;
+  $cat_id = (int)$cat_id;
+  $price  = (float)$price;
+  if ($id) {
+      $stmt = $mysqli->prepare("UPDATE dishes SET name=?, cat_id=?, price=?, img=? WHERE id=?");
+      $stmt->bind_param('sissi', $name, $cat_id, $price, $img, $id);
+  } else {
+      $stmt = $mysqli->prepare("INSERT INTO dishes (name, cat_id, price, img) VALUES (?,?,?,?)");
+      $stmt->bind_param('sisd', $name, $cat_id, $price, $img);
+  }
+  $stmt->execute();
 }

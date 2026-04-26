@@ -51,7 +51,7 @@ function gen_admin_header($title, $head_inject = "") {
 HTML;
 }
 
-function gen_table($table_icon, $table_id, $table_name, $columns, $table, $render_row){
+function gen_table($table_icon, $table_id, $table_name, $columns, $table, $render_row, $add=true){
   $count = count($table);
   echo <<<HTML
   <div class="panel" id="{$table_id}">
@@ -97,7 +97,7 @@ function gen_table($table_icon, $table_id, $table_name, $columns, $table, $rende
       }
   }
 
-  echo <<<HTML
+  if ($add) echo <<<HTML
       </tbody>
     </table>
     <div class="add-row">
