@@ -1,5 +1,4 @@
 <?php
-require_once("template.php");
 require_once("mysql.php");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -27,3 +26,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 }
+header("Location: index.php");
