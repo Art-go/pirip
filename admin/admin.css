@@ -1,0 +1,60 @@
+*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,-apple-system,'Segoe UI',sans-serif}
+  body{
+    background:#f9f7f5;
+    color:#1e1e1e;
+    min-height:100vh;
+    display: block;
+}
+  
+  /* header */
+  .header-right{display:flex;align-items:center;gap:14px}
+  .site-link{font-size:.85rem;color:#888;text-decoration:none;font-weight:600;display:flex;align-items:center;gap:5px}
+  .site-link:hover{color:#e05a2c}
+  .logout-btn{background:#f1f1f1;border:none;padding:8px 16px;border-radius:60px;font-weight:600;
+    font-size:.85rem;cursor:pointer;color:#555;transition:.2s;display:flex;align-items:center;gap:6px}
+  .logout-btn:hover{background:#e05a2c;color:white}
+
+  /* main */
+  .adm-main{max-width:1400px;margin:0 auto;padding:2rem 1.5rem}
+
+  .count-badge{background:#f0eae4;color:#888;border-radius:99px;padding:2px 12px;font-size:.82rem;font-weight:600}
+
+  /* table */
+  .adm-table{width:100%;border-collapse:collapse;font-size:.9rem}
+  .adm-table th{text-align:left;padding:10px 12px;font-size:.8rem;font-weight:700;
+    text-transform:uppercase;letter-spacing:.04em;color:#aaa;border-bottom:2px solid #f0eae4}
+  .adm-table td{padding:10px 12px;border-bottom:1px solid #f7f2ef;vertical-align:middle}
+  .adm-table tr:last-child td{border-bottom:none}
+  .adm-table tr:hover td{background:#fdf9f7}
+  .adm-table img{width:40px;height:40px;border-radius:10px;object-fit:cover;background:#f5f0ec}
+
+  /* row actions */
+  .row-actions{display:flex;gap:8px;justify-content:flex-end}
+  .act-btn{border:none;padding:7px 14px;border-radius:60px;font-size:.8rem;font-weight:700;
+    cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:.15s;text-decoration:none}
+  .act-edit{background:#f0eae4;color:#555}
+  .act-edit:hover{background:#e05a2c;color:white}
+  .act-del{background:#fff0f0;color:#c0392b}
+  .act-del:hover{background:#c0392b;color:white}
+
+  /* add button */
+  .add-row{padding-top:1.2rem;display:flex;justify-content:flex-end}
+
+  /* create table notice */
+  .notice{background:#fff8f5;border:1.5px dashed #ffd5be;border-radius:14px;padding:1.2rem 1.5rem;
+    color:#888;font-size:.9rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+  .notice strong{color:#e05a2c}
+
+  /* empty */
+  .empty-row td{text-align:center;padding:2rem;color:#bbb;font-style:italic}
+
+  /* price */
+  .price-cell{color:#e05a2c;font-weight:700}
+
+  /* truncate */
+  .trunc{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  @media(max-width:700px){
+    .adm-table td:nth-child(3),.adm-table th:nth-child(3){display:none}
+    .tab-link span{display:none}
+  }

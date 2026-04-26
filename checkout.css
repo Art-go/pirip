@@ -5,31 +5,6 @@
     align-items: start;
 }
 
-/* ── Shared panel shell ── */
-.order-panel,
-.form-panel {
-    background: white;
-    border-radius: 28px;
-    padding: 2rem;
-    box-shadow: 0 12px 26px -8px rgba(0, 0, 0, 0.08);
-    border: 1px solid #fff2e9;
-}
-
-.panel-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding-bottom: 0.8rem;
-    border-bottom: 3px solid #f0eae4;
-}
-
-.panel-title i {
-    color: #e05a2c;
-}
-
 /* ── Order item list ── */
 .order-items-scroll {
     max-height: 420px;
