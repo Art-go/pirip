@@ -39,9 +39,9 @@
                     <div class="order-name">${item.name}</div>
                     
                     <div class="cart-item-actions">
-                        <button class="qty-btn dec-qty" data-id="${item.id}">−</button>
+                        <button class="qty-btn dec-qty" data-id="${item.id}"><i class="fas fa-minus"></i></button>
                         <span class="item-qty">${item.quantity}</span>
-                        <button class="qty-btn inc-qty" data-id="${item.id}">+</button>
+                        <button class="qty-btn inc-qty" data-id="${item.id}"><i class="fas fa-plus"></i></button>
                         <button class="remove-btn" data-id="${item.id}" title="Удалить">
                             <i class="fas fa-trash-alt"></i>
                         </button>

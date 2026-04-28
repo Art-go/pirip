@@ -4,12 +4,20 @@
 
     const appContainer = document.getElementById("app");
     const cartCountSpan = document.getElementById("cart-count");
-    const modalOverlay = document.getElementById("cartModalOverlay");
+    const cartModalOverlay = document.getElementById("cartModalOverlay");
+    const itemCardModalOverlay = document.getElementById("itemCardModalOverlay");
     const openCartBtn = document.getElementById("openCartBtn");
-    const closeModalBtn = document.getElementById("closeModalBtn");
+    const closeModalBtns = Array.from(document.getElementsByClassName("close-modal"));
     const cartItemsList = document.getElementById("cartItemsList");
     const cartTotalPriceSpan = document.getElementById("cartTotalPrice");
     const checkoutBtn = document.getElementById("checkoutBtn");
+    const itemCardTitle = document.getElementById("itemCardTitle");
+    const foodModalAddBtn = document.getElementById("foodModalAddBtn");
+    const itemCardModalName = document.getElementById("itemCardModalName");
+    const itemCardModalPrice = document.getElementById("itemCardModalPrice");
+    const itemCardModalDescription = document.getElementById("itemCardModalDescription");
+    const itemCardModalImg = document.getElementById("itemCardModalImg");
+    const itemCardButtons = document.getElementById("itemCardButtons");
 
     function saveCart() {
         localStorage.setItem("cart", JSON.stringify(cart));
@@ -53,11 +61,11 @@
                     <div class="cart-item-actions">
                         <button class="qty-btn dec-qty" data-id="${
                             item.id
-                        }">−</button>
+                        }"><i class="fas fa-minus"></i></button>
                         <span class="item-qty">${item.quantity}</span>
                         <button class="qty-btn inc-qty" data-id="${
                             item.id
-                        }">+</button>
+                        }"><i class="fas fa-plus"></i></button>
                         <button class="remove-btn" data-id="${
                             item.id
                         }" title="Удалить"><i class="fas fa-trash-alt"></i></button>
@@ -88,36 +96,39 @@
 
     function handleCartAction(e) {
         const target = e.target.closest("button");
-        if (!target) return;
-        const cartContainer = e.target.closest(".cart-item");
-        if (!cartContainer) return;
+        if (!target) return null;
 
-        const itemId = target.dataset.id || cartContainer.dataset.cartId;
-        if (!itemId) return;
+        const itemId = target.dataset.id;
+        if (!itemId) return null;
+        
+        const item = cart.find((i) => i.id === itemId);
+        
+        const remove_item = () => {
+            cart = cart.filter((i) => i.id !== itemId);
+            itemCardButtons.style.display = "none";
+            foodModalAddBtn.style.display = "flex";
+        }
 
         if (target.classList.contains("inc-qty")) {
-            const item = cart.find((i) => i.id === itemId);
-            if (item) {
-                item.quantity += 1;
+            item.quantity += 1;
+        }
+        else if (target.classList.contains("dec-qty")) {
+            if (item.quantity > 1) {
+                item.quantity -= 1;
+            } 
+            else {
+                remove_item();
+                return null;
             }
-        } else if (target.classList.contains("dec-qty")) {
-            const item = cart.find((i) => i.id === itemId);
-            if (item) {
-                if (item.quantity > 1) {
-                    item.quantity -= 1;
-                } else {
-                    cart = cart.filter((i) => i.id !== itemId);
-                }
-            }
-        } else if (
-            target.classList.contains("remove-btn") ||
-            target.closest(".remove-btn")
-        ) {
-            cart = cart.filter((i) => i.id !== itemId);
+        } 
+        else if (target.closest(".remove-btn")) {
+            remove_item();
+            return null;
         }
 
         saveCart();
         updateCartUI();
+        return item;
     }
 
     async function proceedToCheckout() {
@@ -129,41 +140,86 @@
     }
 
     function openCartModal() {
-        modalOverlay.style.display = "flex";
+        cartModalOverlay.style.display = "flex";
         renderCartItems();
     }
 
-    function closeCartModal() {
-        modalOverlay.style.display = "none";
+    function closeModal() {
+        cartModalOverlay.style.display = "none";
+        itemCardModalOverlay.style.display = "none";
     }
+    
+    let openedItemCard;
+    function openItemCard(dataset) {
+        openedItemCard = dataset;
+        itemCardModalOverlay.style.display = "flex";
+        itemCardTitle.innerHTML = dataset.name;
+        itemCardModalName.innerHTML = dataset.name;
+        itemCardModalPrice.innerHTML = dataset.price;
+        itemCardModalImg.src = dataset.img;
+        itemCardModalDescription.innerHTML = dataset.description;
+
+        const existing = cart.find((i) => i.id === dataset.id);
+        if (existing){
+            itemCardButtons.style.display = "flex";
+            foodModalAddBtn.style.display = "none";
+            itemCardButtons.getElementsByClassName("dec-qty")[0].dataset.id = dataset.id;
+            itemCardButtons.getElementsByClassName("item-qty")[0].innerHTML = existing.quantity;
+            itemCardButtons.getElementsByClassName("inc-qty")[0].dataset.id = dataset.id;
+            itemCardButtons.getElementsByClassName("remove-btn")[0].dataset.id = dataset.id;
+        }
+        else{
+            itemCardButtons.style.display = "none";
+            foodModalAddBtn.style.display = "flex";
+        }
+    }
+    
 
     cart = JSON.parse(localStorage.getItem("cart") || "[]");
     updateCartUI();
 
     appContainer.addEventListener("click", (e) => {
+        const card = e.target.closest(".food-card");
         const addBtn = e.target.closest(".add-btn");
-        if (!addBtn) return;
-        const id = addBtn.dataset.id;
-        const name = addBtn.dataset.name;
-        const price = addBtn.dataset.price;
-        const img = addBtn.dataset.img;
-        if (id && name && price) {
-            addToCart(id, name, price, img);
+        if (addBtn) {
+            const id = card.dataset.id;
+            const name = card.dataset.name;
+            const price = card.dataset.price;
+            const img = card.dataset.img;
+            if (id && name && price) {
+                addToCart(id, name, price, img);
+            }
+            return;
         }
+        openItemCard(card.dataset);
     });
 
     openCartBtn.addEventListener("click", openCartModal);
-    closeModalBtn.addEventListener("click", closeCartModal);
-    modalOverlay.addEventListener("click", (e) => {
-        if (e.target === modalOverlay) closeCartModal();
+
+    closeModalBtns.forEach(item => item.addEventListener("click", closeModal));
+
+    cartModalOverlay.addEventListener("click", (e) => {
+        if (e.target === cartModalOverlay) closeModal();
     });
+
+    itemCardButtons.addEventListener("click", (e) => {
+        const item = handleCartAction(e);
+        if (item!=null) itemCardButtons.getElementsByClassName("item-qty")[0].innerHTML = item.quantity;
+    })
+
+    foodModalAddBtn.addEventListener("click", (e) => {
+        addToCart(openedItemCard.id, openedItemCard.name, openedItemCard.price, openedItemCard.img);
+        itemCardButtons.style.display = "flex";
+        foodModalAddBtn.style.display = "none";
+        itemCardButtons.getElementsByClassName("item-qty")[0].innerHTML = 1;
+    })
 
     cartItemsList.addEventListener("click", handleCartAction);
     checkoutBtn.addEventListener("click", proceedToCheckout);
 
     window.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && modalOverlay.style.display === "flex") {
-            closeCartModal();
+        if (e.key === "Escape") {
+            closeModal();
         }
     });
 })();

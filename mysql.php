@@ -1,9 +1,71 @@
 <?php
 
-$mysqli = new mysqli("mysql-8.4.local", "root", "", "pirip");
+$mysqli = new mysqli("localhost", "root", "", "pirip");
 
-define('ADMIN_USER', 'admin');
-define('ADMIN_PASS', 'admin123');
+function get_users() {
+  global $mysqli;
+  return $mysqli->query("SELECT * FROM users ORDER BY id")->fetch_all(MYSQLI_ASSOC);
+}
+
+function get_user($id) {
+  global $mysqli;
+  $stmt = $mysqli->prepare("SELECT * FROM `users` WHERE id=?");
+  $stmt->bind_param('i', $id);
+  $stmt->execute();
+  return $stmt->get_result()->fetch_assoc() ?? [];
+}
+
+function validate_user($username, $pass){
+  global $mysqli;
+  $stmt = $mysqli->prepare("SELECT * FROM `users` WHERE username=?");
+  $stmt->bind_param('s', $username);
+  $stmt->execute();
+  $user = $stmt->get_result()->fetch_assoc() ?? [];
+
+  if (!$user) return ["status" => false];
+
+  $res = ["status" => password_verify($pass, $user["pass_hash"]), "user" => $user];
+  $res["user"]["pass_hash"] = "";
+
+  return $res;
+}
+
+function reg_user($username, $password, $confirm_password){
+  global $mysqli;
+
+  //check if vars are not empty
+  if (!$username || !$password || !$confirm_password) return ["status" => false, "error" => ""];
+  
+
+  //password checks
+  if ($password != $confirm_password) return ["status" => false, "error" => "Пароль должен совпадать!"];
+
+  $pattern = '/^[A-Za-zА-Яа-яЁё0-9!"#$%&\'()*+,\-.:;<=>?@\[\]\\^_`{|}~]{8,100}$/u';
+
+  if (!preg_match($pattern, $password))
+    return ["status" => false, "error" => "Пароль может иметь только латиницу, кириллицу, цифры и спец символы, длина 8–100 символов!"];
+
+
+
+  // check if user exists
+  $stmt = $mysqli->prepare("SELECT * FROM `users` WHERE username=?");
+  $stmt->bind_param('s', $username);
+  $stmt->execute();
+  $user = $stmt->get_result()->fetch_assoc() ?? false;
+
+  if ($user) return ["status" => false, "error" => "Такой пользователь уже есть!"];
+
+  //regging user
+  $stmt_ins = $mysqli->prepare("INSERT INTO `users`(`username`, `pass_hash`) VALUES (?, ?)");
+  $password_hash = password_hash($password, PASSWORD_DEFAULT);
+  $stmt_ins->bind_param('ss', $username, $password_hash);
+  $stmt_ins->execute();
+
+  //giving user back
+  $res = validate_user($username, $password);
+  $res["error"]='';
+  return $res; 
+}
 
 function get_categories() {
   global $mysqli;
@@ -44,7 +106,7 @@ function get_order_items($order_id) {
   return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 }
 
-function save_order($id, $phone, $address, $comment, $status, $receipt_url) {
+function save_order($id, $phone, $address, $comment, $user_id, $status, $receipt_url) {
   global $mysqli;
   if (!$id) return;
   $allowed = ['pending','paid','delivered'];
@@ -59,8 +121,8 @@ function save_order($id, $phone, $address, $comment, $status, $receipt_url) {
   $stmt->execute();
   $total = $stmt->get_result()->fetch_row()[0];
 
-  $stmt = $mysqli->prepare("UPDATE orders SET phone=?, address=?, comment=?, status=?, receipt_url=?, total=? WHERE id=?");
-  $stmt->bind_param('sssssdi', $phone, $address, $comment, $status, $receipt_url, $total, $id);
+  $stmt = $mysqli->prepare("UPDATE orders SET phone=?, address=?, comment=?, user_id=?, status=?, receipt_url=?, total=? WHERE id=?");
+  $stmt->bind_param('sssissdi', $phone, $address, $comment, $user_id, $status, $receipt_url, $total, $id);
   $stmt->execute();
 }
 
@@ -105,12 +167,12 @@ function save_dish($id, $name, $cat_id, $price, $img) {
   $stmt->execute();
 }
 
-function insert_order($phone, $address, $comment, $cart) {
+function insert_order($phone, $address, $comment, $cart, $user_id) {
   global $mysqli;
   $stmt = $mysqli->prepare(
-      "INSERT INTO orders (phone, address, comment, status, total) VALUES (?, ?, ?, 'pending', 0)"
+      "INSERT INTO orders (phone, address, comment, user_id, status, total) VALUES (?, ?, ?, ?, 'pending', 0)"
   );
-  $stmt->bind_param('sss', $phone, $address, $comment);
+  $stmt->bind_param('sssi', $phone, $address, $comment, $user_id);
   $stmt->execute();
   $order_id = $mysqli->insert_id;
 
@@ -137,8 +199,16 @@ function insert_order($phone, $address, $comment, $cart) {
   return $order_id;
 }
 
-function pay_order($id) {
+function pay_order($id, $user_id) {
   global $mysqli;
+  $stmt = $mysqli->prepare(
+      "SELECT * FROM `orders` WHERE id=?"
+  );
+  $stmt->bind_param('i', $id);
+  $stmt->execute();
+  $order = $stmt->get_result()->fetch_assoc()[0];
+  if($order["user_id"]!=$user_id) return;
+  
   $stmt = $mysqli->prepare(
       "UPDATE orders SET status='paid' WHERE id=? AND status='pending'"
   );

@@ -1,8 +1,8 @@
 <?php
-session_start();
-if (!isset($_SESSION['admin'])) { header('Location: login.php'); exit; }
 require_once '../template.php';
 require_once '../mysql.php';
+ 
+validate_admin();
 
 $cats   = get_categories();
 $dishes = get_dishes();
@@ -66,10 +66,11 @@ $orders = get_orders($date);
     </div>
 
     <?php gen_table("fa-receipt", "orders", "Заказы — " . ($isToday ? "Сегодня" : $date),
-    ["ID", "Телефон", "Адрес", "Время", "Статус", "Позиций", "Итого"], $orders, function ($row){ ?>
+    ["ID", "Телефон", "Адрес", "Польз. ID", "Время", "Статус", "Позиций", "Итого"], $orders, function ($row){ ?>
         <td style="color:#bbb;font-size:.85rem">#<?= $row['id'] ?></td>
         <td><?= htmlspecialchars($row['phone']) ?></td>
         <td class="trunc"><?= htmlspecialchars($row['address']) ?></td>
+        <td class="trunc">#<?= ($row['user_id']) ?></td>
         <td style="color:#888;font-size:.85rem"><?= date('H:i', strtotime($row['created_at'])) ?></td>
         <td><?= htmlspecialchars($row['status']) ?></td>
         <td style="color:#888"><?= $row['item_count'] ?></td>

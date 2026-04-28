@@ -5,14 +5,6 @@
     min-height:100vh;
     display: block;
 }
-  
-  /* header */
-  .header-right{display:flex;align-items:center;gap:14px}
-  .site-link{font-size:.85rem;color:#888;text-decoration:none;font-weight:600;display:flex;align-items:center;gap:5px}
-  .site-link:hover{color:#e05a2c}
-  .logout-btn{background:#f1f1f1;border:none;padding:8px 16px;border-radius:60px;font-weight:600;
-    font-size:.85rem;cursor:pointer;color:#555;transition:.2s;display:flex;align-items:center;gap:6px}
-  .logout-btn:hover{background:#e05a2c;color:white}
 
   /* main */
   .adm-main{max-width:1400px;margin:0 auto;padding:2rem 1.5rem}

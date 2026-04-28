@@ -1,7 +1,11 @@
 <?php
+session_start();
 require_once("template.php");
 echo gen_header("Обработка заказа", "<link rel=\"stylesheet\" href=\"checkout.css\">");
 
+if (!isset($_SESSION["user"])){
+    header('Location: /index.php?redirect=/checkout');
+}
 ?>
 `
 <main class="container" id="app">

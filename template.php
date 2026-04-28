@@ -26,7 +26,29 @@ function gen_header($title, $head_inject = "", $header_inject = "") {
           <span>Хинкальня</span>
       </div>
     </a>
-    {$header_inject}
+    <div class="header-right">
+      {$header_inject}
+HTML
+. (!isset($_SESSION['user']) ? <<<HTML
+      <a href="/login.php?redirect={$_SERVER['REQUEST_URI']}">
+        <button class="btn-primary"><i class="fas fa-sign-in-alt"></i> Войти</button>
+      </a>
+HTML
+      : 
+      (( isset($_SESSION['admin']) ? <<<HTML
+      <a href="/admin">
+        <button class="btn-primary"><i class="fas fa-user-shield"></i>Админ</button>
+      </a>
+HTML
+      : ''
+      ) .
+      <<<HTML
+      <a href="/logout.php?redirect={$_SERVER['REQUEST_URI']}">
+        <button class="btn-secondary"><i class="fas fa-sign-out-alt"></i> Выйти</button>
+      </a>
+HTML
+)). <<<HTML
+    </div>
 </header>
 HTML;
 }
@@ -43,8 +65,8 @@ function gen_admin_header($title, $head_inject = "") {
   </a>
   <div class="header-right">
     <a class="site-link" href="/" target="_blank"><i class="fas fa-external-link-alt"></i> Сайт</a>
-    <form method="POST" action="logout.php" style="display:inline">
-      <button class="logout-btn"><i class="fas fa-sign-out-alt"></i> Выйти</button>
+    <form method="POST" action="/logout.php" style="display:inline">
+      <button class="btn-secondary"><i class="fas fa-sign-out-alt"></i> Выйти</button>
     </form>
   </div>
 </header>
@@ -105,4 +127,16 @@ function gen_table($table_icon, $table_id, $table_name, $columns, $table, $rende
     </div>
   </div>
   HTML;
+}
+
+function validate_admin(){
+  session_start();
+  if (!isset($_SESSION['admin'])) {
+    if(!isset($_SESSION['user'])) header('Location: /login.php');
+    else {
+        header('HTTP/1.0 403 Forbidden');
+        exit("You do not have admin rights");
+    }
+    exit;
+  }
 }
